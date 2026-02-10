@@ -1,0 +1,23 @@
+package core;
+
+import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.WebDriverRunner;
+import config.ConfigReader;
+import org.openqa.selenium.WebDriver;
+
+public class DriverManager {
+
+    public static void configureSelenide() {
+        Configuration.browser = ConfigReader.getOrDefault("browser", "chrome");
+        Configuration.baseUrl = ConfigReader.get("base.url");
+        Configuration.timeout = Long.parseLong(ConfigReader.getOrDefault("timeout.ms", "6000"));
+        
+        Configuration.reportsFolder = "build/reports/selenide";
+        Configuration.screenshots = true;
+    }
+
+    public static WebDriver getDriver() {
+        return WebDriverRunner.getWebDriver();
+    }
+}
+

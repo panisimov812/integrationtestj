@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '3.0.2'
+}
+
+group = 'com.demoqa'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+def selenideVersion = '6.19.0'
+def testngVersion = '7.9.0'
+def allureVersion = '2.25.0'
+
+dependencies {
+    implementation "com.codeborne:selenide:${selenideVersion}"
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation "io.qameta.allure:allure-java-commons:${allureVersion}"
+    testImplementation "org.testng:testng:${testngVersion}"
+    testImplementation "io.qameta.allure:allure-testng:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-selenide:${allureVersion}"
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+allure {
+    version = allureVersion
+    autoconfigure = true
+}
+
+// Генерация Allure-отчёта после тестов; allureServe подтянет отчёт и откроет в браузере
+tasks.named("allureReport") {
+    dependsOn(test)
+}
+tasks.named("allureServe") {
+    dependsOn(allureReport)
+}
