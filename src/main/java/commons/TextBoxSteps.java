@@ -7,7 +7,7 @@ public class TextBoxSteps {
 
     private final TextBoxPage textBoxPage = new TextBoxPage();
 
-    @Step("Открываем страницу Text Box")
+    @Step("Открываем страницу: Text Box")
     public TextBoxSteps openTextBoxPage() {
         textBoxPage.openPage();
         return this;
