@@ -15,17 +15,31 @@ repositories {
     mavenCentral()
 }
 
+// Версии из gradle.properties (для IDE и единого источника правды)
+def junitVersion = findProperty('junitVersion') ?: '5.10.1'
+def restAssuredVersion = findProperty('restAssuredVersion') ?: '5.4.0'
+def allureVersion = findProperty('allureVersion') ?: '2.25.0'
 def selenideVersion = '6.19.0'
 def testngVersion = '7.9.0'
-def allureVersion = '2.25.0'
 
 dependencies {
     implementation "com.codeborne:selenide:${selenideVersion}"
     implementation 'org.slf4j:slf4j-simple:2.0.9'
     implementation "io.qameta.allure:allure-java-commons:${allureVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.15.3"
+    implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    implementation "io.rest-assured:json-path:${restAssuredVersion}"
+    implementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
+    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    testImplementation "io.rest-assured:json-path:${restAssuredVersion}"
+    testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
     testImplementation "org.testng:testng:${testngVersion}"
     testImplementation "io.qameta.allure:allure-testng:${allureVersion}"
     testImplementation "io.qameta.allure:allure-selenide:${allureVersion}"
+    // API tests: JUnit 5 (версия из gradle.properties; implementation — чтобы IDE разрешала импорты в src/test)
+    implementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation "io.qameta.allure:allure-junit5:${allureVersion}"
 }
 
 // Задача test только запускает тесты; Allure-отчёт не генерируется и не открывается.
@@ -39,14 +53,28 @@ test {
     }
 }
 
+// API-тесты на JUnit 5 + Rest Assured (отдельная задача)
+tasks.register("apiTest", Test) {
+    description = "Runs API tests (JUnit 5 + Rest Assured)"
+    group = "verification"
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include "**/api/*Test.class", "**/api/*ApiTest.class"
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
 allure {
     version = allureVersion
     autoconfigure = true
 }
 
 // Генерация Allure-отчёта после тестов; allureServe подтянет отчёт и откроет в браузере
+// Для Allure-отчёта по API-тестам: ./gradlew apiTest allureReport allureServe
 tasks.named("allureReport") {
-    dependsOn(test)
+    dependsOn(test, apiTest)
     // Очищаем каталог отчёта, чтобы не было ошибки "directory is already in use"
     doFirst {
         def reportTaskDir = layout.buildDirectory.dir("reports/allure-report/allureReport").get().asFile
@@ -64,6 +92,7 @@ tasks.named("allureServe") {
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(":allureReport") || graph.hasTask(":allureServe")) {
         tasks.named("test").configure { ignoreFailures = true }
+        tasks.named("apiTest").configure { ignoreFailures = true }
     }
 }
 

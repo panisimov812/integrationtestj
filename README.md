@@ -1,26 +1,26 @@
-## UI Automation Framework (Java 17, Gradle, Selenide, TestNG, Allure)
+## UI + API Automation Framework (Java 17, Gradle, Selenide, TestNG, JUnit 5, Rest Assured, Allure)
 
-This project is a UI automation framework for several services (DemoQA **Text Box**, **Yandex** search at ya.ru) using:
+This project is a UI and API automation framework:
 
-- **Java 17**
-- **Gradle**
-- **Selenide**
-- **TestNG**
-- **Allure**
-- **Page Object Model (POM)**
+- **UI:** DemoQA **Text Box**, **Yandex** search (Selenide, TestNG, POM)
+- **API:** Petstore User API (Rest Assured, JUnit 5, Page Object / Object Repository)
+
+Stack: **Java 17**, **Gradle**, **Selenide**, **TestNG**, **JUnit 5**, **Rest Assured**, **Allure**.
 
 ### Project Structure
 
-- `src/main/java/config` – configuration utilities (`ConfigReader`)
-- `src/main/java/core` – driver and Selenide configuration (`DriverManager`)
+- `src/main/java/config` – configuration (`ConfigReader`)
+- `src/main/java/core` – driver and Selenide (`DriverManager`)
 - `src/main/java/utils` – helpers, Allure utilities (`AllureUtils`)
-- `src/main/java/pages` – page objects (`TextBoxPage`, `YandexSearchPage`)
-- `src/main/java/elements` – place for custom reusable UI elements
-- `src/main/java/steps` – high-level step classes (`TextBoxSteps`, `YandexSearchSteps`)
-- `src/test/java/base` – base test class and TestNG listeners (`BaseTest`, `TestAllureListener`)
-- `src/test/java/tests` – TestNG tests (`TextBoxTest`, `YandexSearchTest`)
-- `src/main/resources` – main configuration (`config.properties`)
-- `src/test/resources` – TestNG suite and Allure configuration (`testng.xml`, `allure.properties`)
+- `src/main/java/pages` – UI page objects
+- **`src/main/java/api/clients`** – API clients (e.g. `UserApiClient`)
+- **`src/main/java/api/models`** – request/response models (e.g. `User` with builder)
+- **`src/main/java/api/utils`** – Rest Assured config, Allure API utils
+- `src/test/java/base` – base test class and TestNG listeners
+- `src/test/java/tests` – TestNG UI tests
+- **`src/test/java/api`** – JUnit 5 API tests (`UserApiTest`)
+- `src/main/resources` – `config.properties` (incl. `api.base.url`)
+- `src/test/resources` – TestNG suite, Allure (`testng.xml`, `allure.properties`)
 
 ### Prerequisites
 
@@ -38,7 +38,10 @@ This project is a UI automation framework for several services (DemoQA **Text Bo
 | `./gradlew clean test` | Очистка, запуск тестов. Результаты Allure — в `build/allure-results/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22clean%20test%22%5D) |
 | `./gradlew allureReport` | Запуск тестов и генерация HTML-отчёта в `build/reports/allure-report/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureReport%22%5D) |
 | `./gradlew allureServe` | Тесты + отчёт + открытие отчёта в браузере | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureServe%22%5D) |
-| `./gradlew openAllureReport` | Сгенерировать отчёт и открыть **`index.html`** в браузере вручную (если allureServe не открыл) | [▶ Run](command:workbench.action.tasks.runTask?%5B%22openAllureReport%22%5D) |
+| `./gradlew openAllureReport` | Сгенерировать отчёт и открыть **`index.html`** вручную (если allureServe не открыл) | [▶ Run](command:workbench.action.tasks.runTask?%5B%22openAllureReport%22%5D) |
+| **API-тесты** | | |
+| `./gradlew apiTest` | Только API-тесты (JUnit 5 + Rest Assured): Petstore User — createUser, getUserByName | — |
+| `./gradlew apiTest allureReport allureServe` | API-тесты + генерация Allure-отчёта + открытие в браузере | — |
 
 **Если отчёт не открывается в браузере:** выполните **`./gradlew openAllureReport`** или откройте вручную файл **`build/reports/allure-report/index.html`**.
 
@@ -58,6 +61,7 @@ Main runtime configuration is in `src/main/resources/config.properties`:
 - `yandex.base.url` – URL for Yandex tests (default: `https://ya.ru`)
 - `browser` – browser to use for Selenide (default: `chrome`)
 - `timeout.ms` – default timeout in milliseconds for Selenide (default: `6000`)
+- `api.base.url` – base URL for Petstore API (default: `https://petstore.swagger.io/v2`)
 
 ### Несколько сервисов (архитектура)
 
@@ -71,3 +75,19 @@ Main runtime configuration is in `src/main/resources/config.properties`:
 При добавлении третьего сервиса: добавить свойство в `config.properties`, создать Page (с `open(ConfigReader.get("..."))`), Steps и Test, и зарегистрировать класс в `testng.xml`.
 
 You can adjust these values to fit your environment.
+
+### API Tests (Rest Assured + JUnit 5)
+
+API-тесты используют подход **Page Object / Object Repository**: клиенты в `api/clients`, модели в `api/models`, конфигурация в `api/utils`. Эндпоинты: [createUser](https://petstore.swagger.io/#/user/createUser), [getUserByName](https://petstore.swagger.io/#/user/getUserByName).
+
+**Пример запуска API-тестов с генерацией Allure-отчёта:**
+
+```bash
+# Только запуск API-тестов
+./gradlew apiTest
+
+# Запуск API-тестов + генерация отчёта + открытие в браузере
+./gradlew apiTest allureReport allureServe
+```
+
+При запуске **`allureReport`** (или **`allureServe`**) выполняются и UI (TestNG), и API (JUnit 5) тесты; отчёт содержит оба набора. Чтобы сгенерировать отчёт только по уже запущенным API-тестам, выполните сначала **`apiTest`**, затем **`allureReport`** и **`allureServe`** (результаты из `build/allure-results/` будут использованы).
