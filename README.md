@@ -38,8 +38,11 @@ This project is a UI automation framework for several services (DemoQA **Text Bo
 | `./gradlew clean test` | Очистка, запуск тестов. Результаты Allure — в `build/allure-results/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22clean%20test%22%5D) |
 | `./gradlew allureReport` | Запуск тестов и генерация HTML-отчёта в `build/reports/allure-report/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureReport%22%5D) |
 | `./gradlew allureServe` | Тесты + отчёт + открытие отчёта в браузере | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureServe%22%5D) |
+| `./gradlew openAllureReport` | Сгенерировать отчёт и открыть **`index.html`** в браузере вручную (если allureServe не открыл) | [▶ Run](command:workbench.action.tasks.runTask?%5B%22openAllureReport%22%5D) |
 
-Отчёт после `allureReport` можно открыть вручную: **`build/reports/allure-report/index.html`**.
+**Если отчёт не открывается в браузере:** выполните **`./gradlew openAllureReport`** или откройте вручную файл **`build/reports/allure-report/index.html`**.
+
+При запуске **`allureReport`** или **`allureServe`** отчёт генерируется и открывается **в любом случае** — даже если тесты упали (сборка не останавливается из-за падения тестов).
 
 ### How to Run Tests
 

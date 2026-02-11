@@ -3,9 +3,14 @@ package pages;
 import config.ConfigReader;
 import io.qameta.allure.Step;
 import locators.Locators;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 import static com.codeborne.selenide.Selenide.open;
 import static com.codeborne.selenide.Selenide.title;
+import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static com.codeborne.selenide.WebDriverRunner.url;
 
 /**
@@ -35,9 +40,15 @@ public class YandexSearchPage {
     }
 
     /**
-     * Проверяет, что мы на странице результатов поиска (URL содержит /search/ или заголовок изменился).
+     * Проверяет, что мы на странице результатов поиска (ждём перехода по URL до 15 сек).
      */
     public boolean isOnSearchResultsPage() {
+        try {
+            new WebDriverWait(getWebDriver(), Duration.ofSeconds(15))
+                    .until(ExpectedConditions.urlContains("search"));
+        } catch (Exception e) {
+            return false;
+        }
         String currentUrl = url();
         return currentUrl != null && currentUrl.contains("yandex") && currentUrl.contains("search");
     }

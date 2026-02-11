@@ -8,10 +8,11 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class DataGenerator {
 
+    private static final String CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
     private static final String[] NAMES = {"Иван Иванов", "Мария Петрова", "Алексей Сидоров", "Елена Козлова"};
     private static final String[] CITIES = {"Москва", "Санкт-Петербург", "Казань", "Новосибирск"};
     private static final String[] STREETS = {"ул. Ленина", "пр. Мира", "ул. Пушкина", "ул. Гагарина"};
-    private static final String[] DOMAINS = {"example.com", "test.org", "mail.ru", "yandex.ru"};
+    private static final String[] DOMAINS = {"example.com", "test.org", "mail.ru", "yandex.ru", "gmail.com"};
     private static final String[] QUERIES = {"Selenide", "Selenium", "TestNG", "Allure", "Java"};
 
     private DataGenerator() {
@@ -56,11 +57,12 @@ public class DataGenerator {
      * Случайная строка заданной длины
      */
     public static String generateString(int length) {
-        String chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        if (length <= 0) return "";
         var random = ThreadLocalRandom.current();
         var sb = new StringBuilder(length);
+        int bound = CHARS.length();
         for (int i = 0; i < length; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
+            sb.append(CHARS.charAt(random.nextInt(bound)));
         }
         return sb.toString();
     }

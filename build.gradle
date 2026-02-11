@@ -28,6 +28,8 @@ dependencies {
     testImplementation "io.qameta.allure:allure-selenide:${allureVersion}"
 }
 
+// Задача test только запускает тесты; Allure-отчёт не генерируется и не открывается.
+// Для отчёта: ./gradlew allureReport или ./gradlew allureServe
 test {
     useTestNG() {
         suites 'src/test/resources/testng.xml'
@@ -45,7 +47,46 @@ allure {
 // Генерация Allure-отчёта после тестов; allureServe подтянет отчёт и откроет в браузере
 tasks.named("allureReport") {
     dependsOn(test)
+    // Очищаем каталог отчёта, чтобы не было ошибки "directory is already in use"
+    doFirst {
+        def reportTaskDir = layout.buildDirectory.dir("reports/allure-report/allureReport").get().asFile
+        if (reportTaskDir.exists()) {
+            delete reportTaskDir
+        }
+    }
 }
 tasks.named("allureServe") {
     dependsOn(allureReport)
+}
+
+// Чтобы отчёт всегда появлялся даже при падении тестов: при запуске allureReport/allureServe
+// не останавливаем сборку из-за провала test (отчёт сгенерируется и откроется)
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(":allureReport") || graph.hasTask(":allureServe")) {
+        tasks.named("test").configure { ignoreFailures = true }
+    }
+}
+
+// Открыть отчёт в браузере вручную (если allureServe не открыл автоматически)
+tasks.register("openAllureReport") {
+    dependsOn(allureReport)
+    doLast {
+        def reportDir = layout.buildDirectory.dir("reports/allure-report").get().asFile
+        def indexHtml = new File(reportDir, "index.html")
+        if (indexHtml.exists()) {
+            def uri = indexHtml.toURI()
+            if (uri.scheme == "file" && java.awt.Desktop.isDesktopSupported()) {
+                try {
+                    java.awt.Desktop.desktop.browse(uri)
+                    println "Отчёт открыт: ${uri}"
+                } catch (Exception e) {
+                    println "Не удалось открыть браузер. Откройте вручную: ${indexHtml.absolutePath}"
+                }
+            } else {
+                println "Откройте вручную: ${indexHtml.absolutePath}"
+            }
+        } else {
+            println "Сначала выполните: ./gradlew allureReport"
+        }
+    }
 }

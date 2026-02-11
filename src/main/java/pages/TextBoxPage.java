@@ -49,7 +49,7 @@ public class TextBoxPage {
 
     @Step("Нажимаем кнопку Submit")
     public TextBoxPage submit() {
-        Locators.id(SUBMIT_BUTTON).click();
+        Locators.id(SUBMIT_BUTTON).scrollIntoView(true).click();
         return this;
     }
 
