@@ -1,4 +1,4 @@
-package steps;
+package commons;
 
 import io.qameta.allure.Step;
 import pages.TextBoxPage;
@@ -37,4 +37,3 @@ public class TextBoxSteps {
                 && textBoxPage.getOutputPermanentAddress().contains(permanentAddress);
     }
 }
-

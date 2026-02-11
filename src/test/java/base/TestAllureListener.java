@@ -1,5 +1,8 @@
 package base;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import core.DriverManager;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;
@@ -24,7 +27,24 @@ public class TestAllureListener implements ITestListener {
 
     @Override
     public void onTestStart(ITestResult result) {
-        // no-op
+        String testName = result.getMethod().getMethodName();
+        String className = result.getTestClass().getName();
+        Object[] params = result.getParameters();
+
+        String startedAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        StringBuilder info = new StringBuilder();
+        info.append("Started at: ").append(startedAt).append("\n");
+        info.append("Test: ").append(testName).append("\n");
+        info.append("Class: ").append(className).append("\n");
+        if (params != null && params.length > 0) {
+            info.append("Parameters: ");
+            for (int i = 0; i < params.length; i++) {
+                if (i > 0) info.append(", ");
+                info.append(params[i] != null ? params[i] : "null");
+            }
+        }
+        AllureUtils.attachText("Test started", info.toString());
     }
 
     @Override

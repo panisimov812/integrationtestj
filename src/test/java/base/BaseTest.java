@@ -13,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 @Listeners({base.TestAllureListener.class})
 public abstract class BaseTest {
 
+
     @BeforeClass(alwaysRun = true)
     public void globalSetUp() {
         DriverManager.configureSelenide();
