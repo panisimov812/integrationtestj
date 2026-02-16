@@ -10,5 +10,10 @@
             <class name="tests.YandexSearchTest"/>
         </classes>
     </test>
+    <test name="Google - Search Bar">
+        <classes>
+            <class name="tests.GoogleSearchTest"/>
+        </classes>
+    </test>
 </suite>
 
