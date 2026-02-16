@@ -21,6 +21,7 @@ def restAssuredVersion = findProperty('restAssuredVersion') ?: '5.4.0'
 def allureVersion = findProperty('allureVersion') ?: '2.25.0'
 def selenideVersion = '6.19.0'
 def testngVersion = '7.9.0'
+def testcontainersVersion = findProperty('testcontainersVersion') ?: '1.20.2'
 
 dependencies {
     implementation "com.codeborne:selenide:${selenideVersion}"
@@ -40,6 +41,13 @@ dependencies {
     implementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
     testImplementation "io.qameta.allure:allure-junit5:${allureVersion}"
+    // Database testing: PostgreSQL + Testcontainers (pure JDBC, no Spring)
+    implementation "org.postgresql:postgresql:42.7.2"
+    implementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    implementation "org.testcontainers:postgresql:${testcontainersVersion}"
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
 }
 
 // Задача test только запускает тесты; Allure-отчёт не генерируется и не открывается.
@@ -66,6 +74,26 @@ tasks.register("apiTest", Test) {
     }
 }
 
+// DB-тесты: PostgreSQL + Testcontainers, чистый JDBC
+tasks.register("dbTest", Test) {
+    description = "Runs database integration tests (JUnit 5 + Testcontainers + JDBC)"
+    group = "verification"
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include "**/db/*Test.class", "**/db/*DbTest.class"
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Запуск всех тестов одной командой: UI (TestNG) + API (JUnit) + DB (JUnit)
+tasks.register("allTests") {
+    description = "Runs all tests: UI, API, and Database"
+    group = "verification"
+    dependsOn test, apiTest, dbTest
+}
+
 allure {
     version = allureVersion
     autoconfigure = true
@@ -74,7 +102,7 @@ allure {
 // Генерация Allure-отчёта после тестов; allureServe подтянет отчёт и откроет в браузере
 // Для Allure-отчёта по API-тестам: ./gradlew apiTest allureReport allureServe
 tasks.named("allureReport") {
-    dependsOn(test, apiTest)
+    dependsOn(test, apiTest, dbTest)
     // Очищаем каталог отчёта, чтобы не было ошибки "directory is already in use"
     doFirst {
         def reportTaskDir = layout.buildDirectory.dir("reports/allure-report/allureReport").get().asFile
@@ -93,6 +121,7 @@ gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(":allureReport") || graph.hasTask(":allureServe")) {
         tasks.named("test").configure { ignoreFailures = true }
         tasks.named("apiTest").configure { ignoreFailures = true }
+        tasks.named("dbTest").configure { ignoreFailures = true }
     }
 }
 
