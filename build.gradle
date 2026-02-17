@@ -15,53 +15,62 @@ repositories {
     mavenCentral()
 }
 
-// Версии из gradle.properties (для IDE и единого источника правды)
-def junitVersion = findProperty('junitVersion') ?: '5.10.1'
-def restAssuredVersion = findProperty('restAssuredVersion') ?: '5.4.0'
-def allureVersion = findProperty('allureVersion') ?: '2.25.0'
-def selenideVersion = '6.19.0'
-def testngVersion = '7.9.0'
-def testcontainersVersion = findProperty('testcontainersVersion') ?: '1.20.2'
+// Версии из gradle.properties  
+def versions = [
+    junit           : findProperty('junitVersion') ?: '5.10.1',
+    restAssured     : findProperty('restAssuredVersion') ?: '5.4.0',
+    allure          : findProperty('allureVersion') ?: '2.25.0',
+    selenide        : findProperty('selenideVersion') ?: '6.19.0',
+    testng          : findProperty('testngVersion') ?: '7.9.0',
+    testcontainers  : findProperty('testcontainersVersion') ?: '1.20.2',
+    slf4j           : findProperty('slf4jVersion') ?: '2.0.9',
+    jackson         : findProperty('jacksonVersion') ?: '2.15.3',
+    postgresql      : findProperty('postgresqlVersion') ?: '42.7.2'
+]
 
 dependencies {
-    implementation "com.codeborne:selenide:${selenideVersion}"
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
-    implementation "io.qameta.allure:allure-java-commons:${allureVersion}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.15.3"
-    implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
-    implementation "io.rest-assured:json-path:${restAssuredVersion}"
-    implementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
-    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
-    testImplementation "io.rest-assured:json-path:${restAssuredVersion}"
-    testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
-    testImplementation "org.testng:testng:${testngVersion}"
-    testImplementation "io.qameta.allure:allure-testng:${allureVersion}"
-    testImplementation "io.qameta.allure:allure-selenide:${allureVersion}"
-    // API tests: JUnit 5 (версия из gradle.properties; implementation — чтобы IDE разрешала импорты в src/test)
-    implementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
-    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
-    testImplementation "io.qameta.allure:allure-junit5:${allureVersion}"
-    // Database testing: PostgreSQL + Testcontainers (pure JDBC, no Spring)
-    implementation "org.postgresql:postgresql:42.7.2"
-    implementation "org.testcontainers:testcontainers:${testcontainersVersion}"
-    implementation "org.testcontainers:postgresql:${testcontainersVersion}"
-    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
-    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
-    testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
+    // UI
+    implementation "com.codeborne:selenide:${versions.selenide}"
+    implementation "io.qameta.allure:allure-java-commons:${versions.allure}"
+    implementation "io.qameta.allure:allure-selenide:${versions.allure}"
+
+    // Логирование и JSON
+    implementation "org.slf4j:slf4j-simple:${versions.slf4j}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}"
+
+    // БД (main: конфиг; тесты используют Testcontainers)
+    implementation "org.postgresql:postgresql:${versions.postgresql}"
+
+    // Тесты: TestNG + Allure (UI-тесты)
+    testImplementation "org.testng:testng:${versions.testng}"
+    testImplementation "io.qameta.allure:allure-testng:${versions.allure}"
+
+    // Тесты: JUnit 5 + Rest Assured + Allure (API)
+    testImplementation "org.junit.jupiter:junit-jupiter:${versions.junit}"
+    testImplementation "io.rest-assured:rest-assured:${versions.restAssured}"
+    testImplementation "io.rest-assured:json-path:${versions.restAssured}"
+    testImplementation "io.qameta.allure:allure-rest-assured:${versions.allure}"
+    testImplementation "io.qameta.allure:allure-junit5:${versions.allure}"
+
+    // Тесты: Testcontainers + PostgreSQL (DB)
+    testImplementation "org.testcontainers:testcontainers:${versions.testcontainers}"
+    testImplementation "org.testcontainers:postgresql:${versions.testcontainers}"
+    testImplementation "org.testcontainers:junit-jupiter:${versions.testcontainers}"
 }
 
-// Задача test только запускает тесты; Allure-отчёт не генерируется и не открывается.
-// Для отчёта: ./gradlew allureReport или ./gradlew allureServe
-test {
-    useTestNG() {
-        suites 'src/test/resources/testng.xml'
-    }
+// --- Задачи тестирования ---
+tasks.withType(Test).configureEach {
     testLogging {
         events "passed", "skipped", "failed"
     }
 }
 
-// API-тесты на JUnit 5 + Rest Assured (отдельная задача)
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+}
+
 tasks.register("apiTest", Test) {
     description = "Runs API tests (JUnit 5 + Rest Assured)"
     group = "verification"
@@ -69,12 +78,8 @@ tasks.register("apiTest", Test) {
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
     include "**/api/*Test.class", "**/api/*ApiTest.class"
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
 }
 
-// DB-тесты: PostgreSQL + Testcontainers, чистый JDBC
 tasks.register("dbTest", Test) {
     description = "Runs database integration tests (JUnit 5 + Testcontainers + JDBC)"
     group = "verification"
@@ -82,28 +87,23 @@ tasks.register("dbTest", Test) {
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
     include "**/db/*Test.class", "**/db/*DbTest.class"
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
 }
 
-// Запуск всех тестов одной командой: UI (TestNG) + API (JUnit) + DB (JUnit)
 tasks.register("allTests") {
     description = "Runs all tests: UI, API, and Database"
     group = "verification"
     dependsOn test, apiTest, dbTest
 }
 
+// --- Allure ---
+
 allure {
-    version = allureVersion
+    version = versions.allure
     autoconfigure = true
 }
 
-// Генерация Allure-отчёта после тестов; allureServe подтянет отчёт и откроет в браузере
-// Для Allure-отчёта по API-тестам: ./gradlew apiTest allureReport allureServe
 tasks.named("allureReport") {
     dependsOn(test, apiTest, dbTest)
-    // Очищаем каталог отчёта, чтобы не было ошибки "directory is already in use"
     doFirst {
         def reportTaskDir = layout.buildDirectory.dir("reports/allure-report/allureReport").get().asFile
         if (reportTaskDir.exists()) {
@@ -111,12 +111,11 @@ tasks.named("allureReport") {
         }
     }
 }
+
 tasks.named("allureServe") {
     dependsOn(allureReport)
 }
 
-// Чтобы отчёт всегда появлялся даже при падении тестов: при запуске allureReport/allureServe
-// не останавливаем сборку из-за провала test (отчёт сгенерируется и откроется)
 gradle.taskGraph.whenReady { graph ->
     if (graph.hasTask(":allureReport") || graph.hasTask(":allureServe")) {
         tasks.named("test").configure { ignoreFailures = true }
@@ -125,7 +124,6 @@ gradle.taskGraph.whenReady { graph ->
     }
 }
 
-// Открыть отчёт в браузере вручную (если allureServe не открыл автоматически)
 tasks.register("openAllureReport") {
     dependsOn(allureReport)
     doLast {
