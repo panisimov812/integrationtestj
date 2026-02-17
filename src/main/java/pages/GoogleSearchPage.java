@@ -14,9 +14,8 @@ public class GoogleSearchPage {
     /** Имя атрибута поисковой строки на google.com */
     public static final String SEARCH_INPUT_NAME = "q";
 
-    public GoogleSearchPage openPage() {
+    public void openPage() {
         open(ConfigReader.get("google.base.url"));
-        return this;
     }
 
     @Step("Проверяем, что поисковая строка отображается")

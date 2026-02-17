@@ -53,7 +53,7 @@ public final class Checks {
     @Step("Проверка: отображается — {elementDescription}")
     public static void assertDisplayed(boolean isDisplayed, String elementDescription) {
         if (!isDisplayed) {
-            throw new AssertionError("Ожидалось, что отображается: " + elementDescription);
+            throw new AssertionError( "Элемент: " + elementDescription + " не отобразился");
         }
     }
 

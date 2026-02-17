@@ -8,9 +8,8 @@ public class GoogleSearchSteps {
     private final GoogleSearchPage googleSearchPage = new GoogleSearchPage();
 
     @Step("Открываем главную страницу Google (google.com)")
-    public GoogleSearchSteps openGoogleHome() {
+    public void openGoogleHome() {
         googleSearchPage.openPage();
-        return this;
     }
 
     @Step("Проверяем, что поисковая строка отображается и доступна")
