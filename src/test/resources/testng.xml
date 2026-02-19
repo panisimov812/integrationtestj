@@ -20,5 +20,10 @@
             <class name="tests.InternetLoginTest"/>
         </classes>
     </test>
+    <test name="The Internet - Basic Auth">
+        <classes>
+            <class name="tests.BasicAuthTest"/>
+        </classes>
+    </test>
 </suite>
 

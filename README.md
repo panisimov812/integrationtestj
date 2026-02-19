@@ -86,12 +86,12 @@ Stack: **Java 17**, **Gradle**, **Selenide**, **TestNG**, **JUnit 5**, **Rest As
 |--------|----------|--------|
 | `./gradlew clean` затем `rm -rf build .gradle` | Полная очистка артефактов сборки и локального кэша Gradle | — |
 | `./gradlew clean test` | Очистка и запуск только UI-тестов. Результаты Allure — в `build/allure-results/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22clean%20test%22%5D) |
-| `./gradlew allureReport` | Запуск всех тестов (UI + API + DB) и генерация HTML-отчёта в `build/reports/allure-report/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureReport%22%5D) |
+| `./gradlew allureReport` | Запуск всех тестов (UI + API + DB) и генерация HTML-отчёта в `build/reports/allure-report/allureReport/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureReport%22%5D) |
 | `./gradlew allureServe` | То же, что `allureReport`, плюс открытие отчёта в браузере | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureServe%22%5D) |
-| `./gradlew openAllureReport` | Сгенерировать отчёт и открыть **`index.html`** вручную (если allureServe не открыл) | [▶ Run](command:workbench.action.tasks.runTask?%5B%22openAllureReport%22%5D) |
+| `./gradlew openAllureReport` | Сгенерировать отчёт, запустить локальный HTTP-сервер и открыть отчёт в браузере (Overview, Categories загружаются). Задача блокируется до **Ctrl+C** | [▶ Run](command:workbench.action.tasks.runTask?%5B%22openAllureReport%22%5D) |
 | `./gradlew clean allTests` | Очистка и запуск **всех** тестов без генерации отчёта | — |
 
-**Если отчёт не открывается в браузере:** выполните **`./gradlew openAllureReport`** или откройте вручную **`build/reports/allure-report/index.html`**.
+**Если отчёт не открывается в браузере:** выполните **`./gradlew openAllureReport`** — отчёт откроется по **http://localhost:19999**. Не открывайте `index.html` по `file://`: данные (Overview, Categories) не загрузятся из-за ограничений браузера.
 
 При запуске **`allureReport`** или **`allureServe`** отчёт генерируется **даже если тесты упали** (сборка не останавливается из-за падения тестов).
 

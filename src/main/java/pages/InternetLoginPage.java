@@ -17,7 +17,7 @@ public class InternetLoginPage {
     private static final String PASSWORD_ID = "password";
 
     public InternetLoginPage openPage() {
-        open(ConfigReader.get("internet.login.url"));
+        open(ConfigReader.get("internet.base.url") + "/login");
         return this;
     }
 

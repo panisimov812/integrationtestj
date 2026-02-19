@@ -12,7 +12,14 @@ public class TestAllureListener implements ITestListener {
     @Override
     public void onTestFailure(ITestResult result) {
         AllureUtils.attachText("Failed test", result.getName());
-        // Скриншот при падении делается в BaseTest.tearDown() до закрытия драйвера
+        WebDriver driver = null;
+        try {
+            driver = DriverManager.getDriver();
+        } catch (IllegalStateException ignored) {
+            // драйвер ещё не был создан или уже закрыт
+        }
+        byte[] screenshotBytes = AllureUtils.takeScreenshotBytes(driver);
+        AllureUtils.attachScreenshotToCurrentTest("Screenshot at failure: " + result.getName(), screenshotBytes);
     }
 
     @Override
@@ -22,12 +29,7 @@ public class TestAllureListener implements ITestListener {
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        WebDriver driver = null;
-        try {
-            driver = DriverManager.getDriver();
-        } catch (IllegalStateException ignored) {
-        }
-        AllureUtils.attachScreenshot("Screenshot at success: " + result.getName(), driver);
+        // скриншоты только при падении — см. onTestFailure
     }
 
     @Override

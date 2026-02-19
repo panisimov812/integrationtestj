@@ -127,22 +127,51 @@ gradle.taskGraph.whenReady { graph ->
 tasks.register("openAllureReport") {
     dependsOn(allureReport)
     doLast {
-        def reportDir = layout.buildDirectory.dir("reports/allure-report").get().asFile
+        // Allure по file:// не грузит data/*.json (CORS) — отдаём отчёт через HTTP
+        def reportDir = layout.buildDirectory.dir("reports/allure-report/allureReport").get().asFile
         def indexHtml = new File(reportDir, "index.html")
-        if (indexHtml.exists()) {
-            def uri = indexHtml.toURI()
-            if (uri.scheme == "file" && java.awt.Desktop.isDesktopSupported()) {
-                try {
-                    java.awt.Desktop.desktop.browse(uri)
-                    println "Отчёт открыт: ${uri}"
-                } catch (Exception e) {
-                    println "Не удалось открыть браузер. Откройте вручную: ${indexHtml.absolutePath}"
-                }
-            } else {
-                println "Откройте вручную: ${indexHtml.absolutePath}"
-            }
-        } else {
+        if (!indexHtml.exists()) {
             println "Сначала выполните: ./gradlew allureReport"
+            return
         }
+        def port = 19999
+        def contentType = { String path ->
+            if (path.endsWith(".html")) return "text/html; charset=utf-8"
+            if (path.endsWith(".css")) return "text/css"
+            if (path.endsWith(".js")) return "application/javascript"
+            if (path.endsWith(".json")) return "application/json"
+            if (path.endsWith(".png")) return "image/png"
+            if (path.endsWith(".ico")) return "image/x-icon"
+            if (path.endsWith(".csv")) return "text/csv"
+            if (path.endsWith(".txt")) return "text/plain"
+            return "application/octet-stream"
+        }
+        def server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(port), 0)
+        server.createContext("/", { ex ->
+            String path = ex.getRequestURI().getPath()
+            if (path == null || path == "/") path = "index.html"
+            else if (path.startsWith("/")) path = path.substring(1)
+            File file = new File(reportDir, path)
+            if (file.exists() && file.isFile()) {
+                ex.getResponseHeaders().set("Content-Type", contentType(path))
+                ex.sendResponseHeaders(200, file.length())
+                ex.getResponseBody().write(file.bytes)
+            } else {
+                ex.sendResponseHeaders(404, -1)
+            }
+            ex.close()
+        } as com.sun.net.httpserver.HttpHandler)
+        server.start()
+        def url = "http://localhost:${port}"
+        if (java.awt.Desktop.isDesktopSupported()) {
+            try {
+                java.awt.Desktop.desktop.browse(new URI(url))
+            } catch (Exception e) {
+                println "Браузер не открыт: ${e.message}"
+            }
+        }
+        println "Отчёт Allure: ${url}"
+        println "Остановка: Ctrl+C"
+        Thread.currentThread().join()
     }
 }
