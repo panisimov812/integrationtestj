@@ -2,7 +2,7 @@
 
 This project is a UI and API automation framework:
 
-- **UI:** DemoQA **Text Box**, **Yandex** search (Selenide, TestNG, POM)
+- **UI:** **Google** и **Yandex** search (Selenide, TestNG, POM)
 - **API:** Petstore User API (Rest Assured, JUnit 5, Page Object / Object Repository)
 
 Stack: **Java 17**, **Gradle**, **Selenide**, **TestNG**, **JUnit 5**, **Rest Assured**, **Allure**.
@@ -32,41 +32,78 @@ Stack: **Java 17**, **Gradle**, **Selenide**, **TestNG**, **JUnit 5**, **Rest As
 - Chrome browser installed (default configuration uses Chrome via Selenide)
 - **Для тестов с БД:** перед запуском `dbTest` или `allTests` должен быть запущен **Docker** (например, [Docker Desktop](https://www.docker.com/products/docker-desktop/) — проверено на версии 4.38.0). Если Docker не запущен, DB-тесты будут пропущены (SKIPPED) с сообщением в отчёте Allure.
 
-### Команды (Commands)
+### Команды запуска (Commands)
 
-Из корня проекта (Windows: `gradlew.bat` вместо `./gradlew`). В VS Code можно запустить задачу по ссылке **▶ Run** (откроется терминал и выполнится команда):
+Из корня проекта (Windows: `gradlew.bat` вместо `./gradlew`). В VS Code можно запустить задачу по ссылке **▶ Run** (откроется терминал и выполнится команда).
+
+#### 1) Запуск всех UI-тестов + Allure-отчёт
+
+```bash
+./gradlew test allureReport allureServe
+```
+
+Запускаются все UI-тесты (TestNG, сьют из `testng.xml`), затем генерируется Allure-отчёт и открывается в браузере.  
+*Примечание:* задача `allureReport` по умолчанию запускает также API и DB тесты; отчёт будет содержать все типы тестов. Чтобы отчёт строился только по уже выполненным результатам в `build/allure-results/`, сначала выполните только `test`, затем `allureReport allureServe`.
+
+#### 2) Запуск одного UI-теста + Allure-отчёт
+
+```bash
+# Пример: только GoogleSearchTest
+./gradlew test --tests "tests.GoogleSearchTest" allureReport allureServe
+
+# Другие классы из testng.xml:
+# ./gradlew test --tests "tests.YandexSearchTest" allureReport allureServe
+# ./gradlew test --tests "tests.GoogleSearchKeyboardTest" allureReport allureServe
+```
+
+#### 3) Запуск тестов по БД + Allure-отчёт
+
+Перед запуском должен быть запущен **Docker** (см. раздел Prerequisites).
+
+```bash
+./gradlew dbTest allureReport allureServe
+```
+
+#### 4) Запуск API-тестов + Allure-отчёт
+
+```bash
+./gradlew apiTest allureReport allureServe
+```
+
+#### 5) Запуск всех тестов + Allure-отчёт
+
+```bash
+./gradlew allTests allureReport allureServe
+```
+
+Запускаются UI (TestNG), API (JUnit 5) и DB (JUnit 5 + Testcontainers), затем генерируется Allure-отчёт и открывается в браузере.
+
+---
+
+#### Дополнительные команды
 
 | Команда | Описание | ▶ Run |
 |--------|----------|--------|
-| `./gradlew clean` затем `rm -rf build .gradle` | Полная очистка артефактов сборки и локального кэша Gradle. Удаляет `build/` (скомпилированные классы, отчёты) и `.gradle/` (кэш задач, конфигураций). Помогает при сбоях компиляции, «залипшем» кэше, после переключения веток. | — |
-| `./gradlew clean test` | Очистка, запуск тестов. Результаты Allure — в `build/allure-results/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22clean%20test%22%5D) |
-| `./gradlew allureReport` | Запуск тестов и генерация HTML-отчёта в `build/reports/allure-report/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureReport%22%5D) |
-| `./gradlew allureServe` | Тесты + отчёт + открытие отчёта в браузере | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureServe%22%5D) |
+| `./gradlew clean` затем `rm -rf build .gradle` | Полная очистка артефактов сборки и локального кэша Gradle | — |
+| `./gradlew clean test` | Очистка и запуск только UI-тестов. Результаты Allure — в `build/allure-results/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22clean%20test%22%5D) |
+| `./gradlew allureReport` | Запуск всех тестов (UI + API + DB) и генерация HTML-отчёта в `build/reports/allure-report/` | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureReport%22%5D) |
+| `./gradlew allureServe` | То же, что `allureReport`, плюс открытие отчёта в браузере | [▶ Run](command:workbench.action.tasks.runTask?%5B%22allureServe%22%5D) |
 | `./gradlew openAllureReport` | Сгенерировать отчёт и открыть **`index.html`** вручную (если allureServe не открыл) | [▶ Run](command:workbench.action.tasks.runTask?%5B%22openAllureReport%22%5D) |
-| **Все тесты одной командой** | | |
-| `./gradlew clean allTests` | Очистка и запуск **всех** тестов: UI (TestNG) + API (JUnit) + DB (JUnit + Testcontainers). Эквивалент «mvn clean test» для полного прогона. | — |
-| **API-тесты** | | |
-| `./gradlew apiTest` | Только API-тесты (JUnit 5 + Rest Assured): Petstore User — createUser, getUserByName | — |
-| `./gradlew apiTest allureReport allureServe` | API-тесты + генерация Allure-отчёта + открытие в браузере | — |
-| **DB-тесты** | | |
-| `./gradlew dbTest` | Только DB-тесты (JUnit 5 + PostgreSQL Testcontainers + JDBC): сохранение/чтение пользователей | — |
-| `./gradlew dbTest allureReport allureServe` | DB-тесты + генерация Allure-отчёта + открытие в браузере | — |
+| `./gradlew clean allTests` | Очистка и запуск **всех** тестов без генерации отчёта | — |
 
-**Если отчёт не открывается в браузере:** выполните **`./gradlew openAllureReport`** или откройте вручную файл **`build/reports/allure-report/index.html`**.
+**Если отчёт не открывается в браузере:** выполните **`./gradlew openAllureReport`** или откройте вручную **`build/reports/allure-report/index.html`**.
 
-При запуске **`allureReport`** или **`allureServe`** отчёт генерируется и открывается **в любом случае** — даже если тесты упали (сборка не останавливается из-за падения тестов).
+При запуске **`allureReport`** или **`allureServe`** отчёт генерируется **даже если тесты упали** (сборка не останавливается из-за падения тестов).
 
 ### How to Run Tests
 
-1. Запустите тесты одной из команд выше. TestNG выполняет сьют из `src/test/resources/testng.xml` (в т.ч. `TextBoxTest` на `https://demoqa.com/text-box`).
-
-2. Allure-результаты сохраняются в `build/allure-results/`. Для просмотра отчёта используйте `allureReport` или `allureServe` — отдельная установка Allure CLI не нужна.
+Запустите тесты одной из команд из раздела **Команды запуска** выше. TestNG выполняет сьют из `src/test/resources/testng.xml`. Allure-результаты сохраняются в `build/allure-results/`; для просмотра отчёта используйте `allureReport` или `allureServe` — отдельная установка Allure CLI не нужна.
 
 ### Configuration
 
 Main runtime configuration is in `src/main/resources/config.properties`:
 
-- `base.url` – base URL for DemoQA (default: `https://demoqa.com`)
+- `base.url` – base URL for main UI (default: `https://www.google.com`)
 - `yandex.base.url` – URL for Yandex tests (default: `https://ya.ru`)
 - `browser` – browser to use for Selenide (default: `chrome`)
 - `timeout.ms` – default timeout in milliseconds for Selenide (default: `6000`)
@@ -74,10 +111,10 @@ Main runtime configuration is in `src/main/resources/config.properties`:
 
 ### Несколько сервисов (архитектура)
 
-Тесты для разных сайтов (DemoQA и Яндекс) организованы одинаково:
+Тесты для разных сайтов (Google и Яндекс) организованы одинаково:
 
 - **Один BaseTest** — общая настройка Selenide/Allure и tearDown.
-- **Свой URL** — для второго сервиса в конфиге задаётся `yandex.base.url`; страница открывается полным URL в `YandexSearchPage.openPage()`, т.к. `Configuration.baseUrl` занят под DemoQA.
+- **Свой URL** — для второго сервиса в конфиге задаётся `yandex.base.url`; страница открывается полным URL в `YandexSearchPage.openPage()`, т.к. `Configuration.baseUrl` занят под основной UI.
 - **Свой Page / Steps / Test** на сервис: `YandexSearchPage`, `YandexSearchSteps`, `YandexSearchTest`.
 - **Общие** `Locators`, `DriverManager`, `ConfigReader` — без дублирования.
 
@@ -89,17 +126,7 @@ You can adjust these values to fit your environment.
 
 API-тесты используют подход **Page Object / Object Repository**: клиенты в `api/clients`, модели в `api/models`, конфигурация в `api/utils`. Эндпоинты: [createUser](https://petstore.swagger.io/#/user/createUser), [getUserByName](https://petstore.swagger.io/#/user/getUserByName).
 
-**Пример запуска API-тестов с генерацией Allure-отчёта:**
-
-```bash
-# Только запуск API-тестов
-./gradlew apiTest
-
-# Запуск API-тестов + генерация отчёта + открытие в браузере
-./gradlew apiTest allureReport allureServe
-```
-
-При запуске **`allureReport`** (или **`allureServe`**) выполняются UI (TestNG), API (JUnit 5) и DB (JUnit 5) тесты; отчёт содержит все наборы. Чтобы сгенерировать отчёт только по уже запущенным тестам, выполните сначала **`apiTest`** и/или **`dbTest`**, затем **`allureReport`** и **`allureServe`** (результаты из `build/allure-results/` будут использованы).
+Команды запуска API-тестов с Allure-отчётом — см. раздел **Команды запуска** выше (п. 4).
 
 ---
 
@@ -113,8 +140,9 @@ API-тесты используют подход **Page Object / Object Reposito
 
 **Как запускается**
 
-- Все тесты (в т.ч. DB): **`./gradlew clean allTests`**
-- Только DB-тесты: **`./gradlew dbTest`**
+- Все тесты (в т.ч. DB) + Allure: **`./gradlew allTests allureReport allureServe`** (см. п. 5 в **Команды запуска**)
+- Только DB-тесты + Allure: **`./gradlew dbTest allureReport allureServe`** (п. 3)
+- Только DB-тесты без отчёта: **`./gradlew dbTest`**
 
 При первом запуске Testcontainers скачивает образ PostgreSQL (если ещё нет), поднимает контейнер, выполняет `src/test/resources/db/schema.sql` и запускает тесты. Контейнер переиспользуется между тестами (Singleton).
 

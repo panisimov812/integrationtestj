@@ -46,4 +46,13 @@ public class UserApiClient {
                 .when()
                 .get(USER_BY_USERNAME);
     }
+
+    @Step("PUT /user — обновление пользователя '{user.getUsername()}'")
+    public Response updateUser(User user) {
+        return given()
+                .spec(spec)
+                .body(user)
+                .when()
+                .put(USER);
+    }
 }

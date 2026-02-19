@@ -15,7 +15,7 @@ import static com.codeborne.selenide.WebDriverRunner.url;
 
 /**
  * Page Object для главной страницы Яндекса (ya.ru) и поиска.
- * Открывает полный URL из конфига (yandex.base.url), т.к. baseUrl Selenide занят под DemoQA.
+ * Открывает полный URL из конфига (yandex.base.url), т.к. baseUrl Selenide занят под основной UI.
  */
 public class YandexSearchPage {
 

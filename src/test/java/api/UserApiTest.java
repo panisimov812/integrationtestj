@@ -85,4 +85,50 @@ class UserApiTest {
         assertEquals(user.getEmail(), getResponse.jsonPath().getString("email"));
         assertEquals(user.getPhone(), getResponse.jsonPath().getString("phone"));
     }
+
+    @Test
+    @DisplayName("PUT /user — обновление пользователя и проверка через GET")
+    @Description("Создаём пользователя, обновляем firstName/lastName/email через PUT, затем GET возвращает обновлённые данные.")
+    @Severity(SeverityLevel.CRITICAL)
+    void updateUser_thenGetReturnsUpdatedData() {
+        String username = "upduser_" + System.currentTimeMillis();
+        User created = User.builder()
+                .username(username)
+                .firstName("Original")
+                .lastName("Name")
+                .email("original@example.com")
+                .password("pass123")
+                .phone("+79001111111")
+                .userStatus(0)
+                .build();
+
+        userApi.createUser(created);
+        Response getAfterCreate = userApi.getUserByName(username);
+        assertEquals(200, getAfterCreate.getStatusCode(), "User created");
+
+        User updated = User.builder()
+                .username(username)
+                .firstName("Updated")
+                .lastName("Surname")
+                .email("updated@example.com")
+                .password("pass123")
+                .phone("+79002222222")
+                .userStatus(1)
+                .build();
+
+        Response updateResponse = userApi.updateUser(updated);
+        AllureApiUtils.attachBody("Update response", "application/json", updateResponse.getBody().asString());
+        assertTrue(
+                updateResponse.getStatusCode() == 200 || updateResponse.getStatusCode() == 201,
+                "Update user should return 200 or 201"
+        );
+
+        Response getAfterUpdate = userApi.getUserByName(username);
+        AllureApiUtils.attachBody("GET after update", "application/json", getAfterUpdate.getBody().asString());
+        assertEquals(200, getAfterUpdate.getStatusCode());
+        assertEquals(updated.getFirstName(), getAfterUpdate.jsonPath().getString("firstName"));
+        assertEquals(updated.getLastName(), getAfterUpdate.jsonPath().getString("lastName"));
+        assertEquals(updated.getEmail(), getAfterUpdate.jsonPath().getString("email"));
+        assertEquals(updated.getPhone(), getAfterUpdate.jsonPath().getString("phone"));
+    }
 }
