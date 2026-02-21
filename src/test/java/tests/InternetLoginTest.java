@@ -1,5 +1,6 @@
 package tests;
 
+import annotations.Tag;
 import base.BaseTest;
 import checks.Checks;
 import commons.InternetLoginSteps;
@@ -17,6 +18,7 @@ public class InternetLoginTest extends BaseTest {
 
     private final InternetLoginSteps loginSteps = new InternetLoginSteps();
 
+    @Tag("ui")
     @Test(description = "Успешный вход с валидным логином и паролем — переход в защищённую область")
     public void testValidLogin() {
         loginSteps
@@ -28,6 +30,7 @@ public class InternetLoginTest extends BaseTest {
                 "страница защищённой области после валидного входа (tomsmith / SuperSecretPassword!)");
     }
 
+    @Tag("ui")
     @Test(description = "Невалидный пароль — отображается сообщение об ошибке")
     public void testInvalidPassword() {
         loginSteps

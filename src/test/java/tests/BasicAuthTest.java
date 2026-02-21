@@ -1,5 +1,6 @@
 package tests;
 
+import annotations.Tag;
 import base.BaseTest;
 import checks.Checks;
 import commons.BasicAuthSteps;
@@ -18,6 +19,7 @@ public class BasicAuthTest extends BaseTest {
 
     private final BasicAuthSteps basicAuthSteps = new BasicAuthSteps();
 
+    @Tag("ui")
     @Test(description = "Basic Auth с валидными учётными данными (admin/admin) — отображается сообщение об успехе")
     public void testBasicAuthValidCredentials() {
         basicAuthSteps.openBasicAuthWithCredentials(VALID_USER, VALID_PASS);
@@ -27,6 +29,7 @@ public class BasicAuthTest extends BaseTest {
                 "сообщение 'Congratulations! You must have the proper credentials.' после входа с admin/admin");
     }
 
+    @Tag("ui")
     @Test(description = "Basic Auth с невалидными учётными данными — сообщение об успехе не отображается")
     public void testBasicAuthInvalidCredentials() {
         basicAuthSteps.openBasicAuthWithCredentials(INVALID_USER, INVALID_PASS);

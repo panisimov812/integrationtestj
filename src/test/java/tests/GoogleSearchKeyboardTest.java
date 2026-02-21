@@ -1,5 +1,6 @@
 package tests;
 
+import annotations.Tag;
 import base.BaseTest;
 import checks.Checks;
 import commons.GoogleSearchSteps;
@@ -13,6 +14,7 @@ public class GoogleSearchKeyboardTest extends BaseTest {
 
     private final GoogleSearchSteps googleSteps = new GoogleSearchSteps();
 
+    @Tag("ui")
     @Test(description = "Ввод поискового запроса с клавиатуры и отправка по Enter — проверка перехода на страницу результатов")
     public void testGoogleSearchWithKeyboardKeys() {
         String query = "Selenide";

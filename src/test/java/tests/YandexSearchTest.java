@@ -1,5 +1,6 @@
 package tests;
 
+import annotations.Tag;
 import base.BaseTest;
 import commons.YandexSearchSteps;
 import checks.Checks;
@@ -9,6 +10,7 @@ public class YandexSearchTest extends BaseTest {
 
     private final YandexSearchSteps yandexSteps = new YandexSearchSteps();
 
+    @Tag("ui")
     @Test(description = "Вводим запрос в поисковую строку Яндекса и проверяем переход на страницу результатов")
     public void testYandexSearch() {
         String query = "Selenide";

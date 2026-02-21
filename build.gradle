@@ -68,25 +68,41 @@ tasks.withType(Test).configureEach {
 test {
     useTestNG() {
         suites 'src/test/resources/testng.xml'
+        if (project.hasProperty('testngGroups')) {
+            def groups = project.findProperty('testngGroups').toString().split(',').collect { it.trim() }
+            options.includeGroups(*groups)
+        }
     }
 }
 
 tasks.register("apiTest", Test) {
-    description = "Runs API tests (JUnit 5 + Rest Assured)"
+    description = "Runs API tests (JUnit 5 + Rest Assured). By tag: @Tag(\"api\"). Custom: -PincludeTags=api,smoke"
     group = "verification"
-    useJUnitPlatform()
+    useJUnitPlatform {
+        String tags = project.findProperty('includeTags')?.toString() ?: 'api'
+        includeTags(*tags.split(',').collect { it.trim() })
+    }
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
     include "**/api/*Test.class", "**/api/*ApiTest.class"
 }
 
 tasks.register("dbTest", Test) {
-    description = "Runs database integration tests (JUnit 5 + Testcontainers + JDBC)"
+    description = "Runs database integration tests (JUnit 5 + Testcontainers + JDBC). By tag: @Tag(\"db\"). Custom: -PincludeTags=db"
     group = "verification"
-    useJUnitPlatform()
+    useJUnitPlatform {
+        String tags = project.findProperty('includeTags')?.toString() ?: 'db'
+        includeTags(*tags.split(',').collect { it.trim() })
+    }
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
     include "**/db/*Test.class", "**/db/*DbTest.class"
+}
+
+tasks.register("uiTest") {
+    description = "Runs UI tests only (TestNG, group 'ui'). Alias for: test"
+    group = "verification"
+    dependsOn test
 }
 
 tasks.register("allTests") {

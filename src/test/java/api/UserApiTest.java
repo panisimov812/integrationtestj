@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Epic("Petstore API")
 @Feature("User")
 @DisplayName("User API Tests")
+@Tag("api")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserApiTest {
 

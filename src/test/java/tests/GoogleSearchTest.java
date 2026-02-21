@@ -1,5 +1,6 @@
 package tests;
 
+import annotations.Tag;
 import base.BaseTest;
 import checks.Checks;
 import commons.GoogleSearchSteps;
@@ -9,6 +10,7 @@ public class GoogleSearchTest extends BaseTest {
 
     private final GoogleSearchSteps googleSteps = new GoogleSearchSteps();
 
+    @Tag("ui")
     @Test(description = "Открываем google.com и проверяем, что поисковая строка отображается и доступна для ввода")
     public void testGoogleSearchBarDisplayed() {
         googleSteps.openGoogleHome();

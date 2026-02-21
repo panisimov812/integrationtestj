@@ -32,6 +32,22 @@ Stack: **Java 17**, **Gradle**, **Selenide**, **TestNG**, **JUnit 5**, **Rest As
 - Chrome browser installed (default configuration uses Chrome via Selenide)
 - **Для тестов с БД:** перед запуском `dbTest` или `allTests` должен быть запущен **Docker** (например, [Docker Desktop](https://www.docker.com/products/docker-desktop/) — проверено на версии 4.38.0). Если Docker не запущен, DB-тесты будут пропущены (SKIPPED) с сообщением в отчёте Allure.
 
+### Теги и запуск по тегам
+
+Тесты помечаются **отдельной аннотацией `@Tag(...)`** над тестом (или классом):
+
+| Тип   | Фреймворк | Аннотация   | Задача      | Запуск по тегу |
+|-------|-----------|-------------|-------------|----------------|
+| **UI**  | TestNG     | `@Tag("ui")` (своя аннотация `annotations.Tag`) | `test`, `uiTest` | `./gradlew test` или `./gradlew uiTest`; фильтр: `./gradlew test -PtestngGroups=ui` |
+| **API** | JUnit 5    | `@Tag("api")` (JUnit) | `apiTest`   | `./gradlew apiTest`; свои теги: `./gradlew apiTest -PincludeTags=api,smoke` |
+| **DB**  | JUnit 5    | `@Tag("db")` (JUnit)  | `dbTest`    | `./gradlew dbTest`; свои теги: `./gradlew dbTest -PincludeTags=db` |
+
+- **UI:** над каждым тестом в `tests.*` стоит отдельная аннотация `@Tag("ui")` (класс `annotations.Tag`). Трансформер `TagAnnotationTransformer` подставляет значение в группы TestNG при запуске, в `testng.xml` в `<groups>` указано `<include name="ui"/>`. Запуск только по тегу: `./gradlew test -PtestngGroups=ui` (несколько через запятую).
+- **API:** класс `UserApiTest` помечен `@Tag("api")` (JUnit 5). Задача `apiTest` по умолчанию запускает тесты с тегом `api`.
+- **DB:** класс `UserRepositoryDbTest` помечен `@Tag("db")` (JUnit 5). Задача `dbTest` по умолчанию запускает тесты с тегом `db`.
+
+Все тесты: `./gradlew allTests` (UI + API + DB).
+
 ### Команды запуска (Commands)
 
 Из корня проекта (Windows: `gradlew.bat` вместо `./gradlew`). В VS Code можно запустить задачу по ссылке **▶ Run** (откроется терминал и выполнится команда).

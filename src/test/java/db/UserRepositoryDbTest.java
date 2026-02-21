@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * Демонстрирует сценарий «API создал пользователя → проверяем в БД» (создание имитируется репозиторием).
  * Если Docker недоступен, тесты пропускаются (SKIPPED) с сообщением в отчёте Allure.
  */
-@Epic("Database")
-@Feature("User Repository")
+ 
 @DisplayName("Database: UserRepository integration tests")
+@Tag("db")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserRepositoryDbTest extends BaseDbTest {
 
