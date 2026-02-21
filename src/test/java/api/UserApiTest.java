@@ -5,7 +5,9 @@ import api.models.User;
 import api.utils.AllureApiUtils;
 import io.qameta.allure.*;
 import io.restassured.response.Response;
+import base.RetryExtension;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("User API Tests")
 @Tag("api")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(RetryExtension.class)
 class UserApiTest {
 
     private UserApiClient userApi;

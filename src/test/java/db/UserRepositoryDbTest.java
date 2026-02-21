@@ -1,7 +1,9 @@
 package db;
 
 import base.BaseDbTest;
+import base.RetryExtension;
 import db.model.User;
+import org.junit.jupiter.api.extension.ExtendWith;
 import io.qameta.allure.*;
 import org.junit.jupiter.api.*;
 
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Database: UserRepository integration tests")
 @Tag("db")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(RetryExtension.class)
 class UserRepositoryDbTest extends BaseDbTest {
 
     @Test

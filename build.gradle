@@ -67,7 +67,7 @@ tasks.withType(Test).configureEach {
 
 test {
     useTestNG() {
-        suites 'src/test/resources/testng.xml'
+        suites file('src/test/resources/testng.xml')
         if (project.hasProperty('testngGroups')) {
             def groups = project.findProperty('testngGroups').toString().split(',').collect { it.trim() }
             options.includeGroups(*groups)

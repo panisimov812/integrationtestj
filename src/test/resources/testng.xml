@@ -3,12 +3,10 @@
     <!-- Аннотация @Tag("ui") на тестах через TagAnnotationTransformer подставляется в groups. -->
     <listeners>
         <listener class-name="base.TagAnnotationTransformer"/>
+        <listener class-name="base.RetryAnnotationTransformer"/>
+        <listener class-name="base.RetryListener"/>
     </listeners>
-    <groups>
-        <run>
-            <include name="ui"/>
-        </run>
-    </groups>
+    <!-- Группа ui задаётся через @Tag("ui") и TagAnnotationTransformer; без <groups> все @Test в перечисленных классах выполняются -->
     <test name="Yandex - Search">
         <classes>
             <class name="tests.YandexSearchTest"/>
